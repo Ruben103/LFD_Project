@@ -1,6 +1,8 @@
 import os
 import zipfile
-from pandas import read_json, DataFrame, concat, to_datetime
+from pandas import read_json, DataFrame, concat, to_datetime, Series
+from datetime import datetime
+from numpy import datetime64
 
 class Data:
 
@@ -15,7 +17,7 @@ class Data:
         except FileNotFoundError:
             print("File", zipfilename, "was not found in directory.")
 
-    def read_jsons(self, directory):
+    def read_data(self, directory):
 
         list_of_items = os.listdir(directory)
         for elem in list_of_items:
@@ -23,17 +25,17 @@ class Data:
                 path = os.path.join(os.getcwd(), directory, elem)
                 os.remove(path)
 
-        #made sure all files are .json files
+        #make sure all files are .json files
         list_of_items = os.listdir(directory)
-        first_read = True
+        data = None
+
         for elem in sorted(list_of_items):
             dt = read_json(os.path.join(os.getcwd(), directory, elem))
-            if not first_read:
+            if data is not None:
                 frames = [data, dt]
                 data = concat(frames)
             else:
                 data = dt
-                first_read = False
         if data.columns[1] == 'collection_start':
             try:
                 data[data.columns[1]] = to_datetime(data[data.columns[1]])
@@ -45,3 +47,14 @@ class Data:
 
         # return sorted data based on collection_start
         return data
+
+    def read_bodies(self, data):
+        #takes around 2 minutes 20 seconds on my Macbook Pro
+
+        bodies = DataFrame(columns=['date', 'body', 'year'])
+        for id in range(data.shape[0]):
+            article = data.iloc[id]['articles']
+            dtime = to_datetime(article['date'])
+            body = article['body']
+            bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']))
+        return bodies

@@ -10,4 +10,5 @@ class Experiments:
     def experimentOne(self):
         # Data().unzip_COP_data(self.data_zipfilename)
 
-        Data().read_jsons(self.data_directory)
+        data = Data().read_data(self.data_directory)
+        bodies = Data().read_bodies(data)
