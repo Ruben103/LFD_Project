@@ -51,7 +51,7 @@ class Data:
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         return data
 
-    def read_bodies(self, data, save_bodies=True):
+    def read_bodies(self, data, save_bodies=False):
         # takes around 2 minutes 20 seconds on my Macbook Pro
         print("\nReading bodies...")
         start_time = datetime.utcnow()
@@ -72,6 +72,16 @@ class Data:
         bodies = read_csv('bodies.csv')
         bodies = bodies.drop(columns=bodies.columns[0])
         return bodies
+
+    def create_word_embeddings_input(self):
+        print("\ncreating input for word embeddings. Writing to BigAss.txt")
+        bodies = self.read_saved_bodies()
+
+        with open("BigAss.txt", 'w+') as handle:
+            # loop over all the rows in bodies
+            for id in range(bodies.shape[0]):
+                handle.write(bodies.iloc[id]['body'])
+        handle.close()
 
     def vectorise_input(self):
         pass

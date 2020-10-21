@@ -14,4 +14,7 @@ class Experiments:
     def experimentOne(self):
         bodies = Data().read_saved_bodies()
 
-        1==1
+
+    def expCreateWordEmbeddingsInput(self):
+
+        Data().create_word_embeddings_input()
