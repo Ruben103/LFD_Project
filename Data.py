@@ -69,9 +69,15 @@ class Data:
         return bodies
 
     def read_saved_bodies(self):
-        bodies = read_csv('bodies.csv')
-        bodies = bodies.drop(columns=bodies.columns[0])
-        return bodies
+        try:
+            bodies = read_csv('bodies.csv')
+            bodies = bodies.drop(columns=bodies.columns[0])
+            return bodies
+        except FileNotFoundError:
+            print(
+                "File bodies.csv was not found..\nCheck if you are in the correct directory or construct them using the method read_bodies in the Data class")
+            quit()
+
 
     def create_word_embeddings_input(self):
         print("\ncreating input for word embeddings. Writing to BigAss.txt")
