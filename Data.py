@@ -1,6 +1,7 @@
 import os
 import zipfile
-from pandas import read_json, DataFrame, concat, to_datetime, Series
+from pandas import read_json, read_csv, DataFrame, concat, to_datetime, Series
+from sklearn.preprocessing import OneHotEncoder
 from datetime import datetime
 from numpy import datetime64
 
@@ -18,7 +19,7 @@ class Data:
             print("File", zipfilename, "was not found in directory.")
 
     def read_data(self, directory):
-
+        print("\nReading data..."); start_time = datetime.utcnow()
         list_of_items = os.listdir(directory)
         for elem in list_of_items:
             if os.path.splitext(elem)[1]!= '.json':
@@ -46,15 +47,34 @@ class Data:
             print("Something went wrong with sorting besed on collection start datetime")
 
         # return sorted data based on collection_start
+        print("Done.", 'Time:', datetime.utcnow() - start_time)
         return data
 
-    def read_bodies(self, data):
+    def read_bodies(self, data, save_bodies=True):
         #takes around 2 minutes 20 seconds on my Macbook Pro
-
+        print("\nReading bodies..."); start_time = datetime.utcnow()
         bodies = DataFrame(columns=['date', 'body', 'year'])
+
         for id in range(data.shape[0]):
             article = data.iloc[id]['articles']
             dtime = to_datetime(article['date'])
             body = article['body']
-            bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']))
+            bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']), ignore_index=True)
+        print("Done.", 'Time:', datetime.utcnow() - start_time)
+        if save_bodies:
+            print("Saving bodies to csv")
+            bodies.to_json('bodies.csv')
         return bodies
+
+    def read_saved_bodies(self):
+        bodies = read_csv('bodies.csv')
+        return bodies
+
+    def vectorise_input(self):
+        pass
+
+    def vectorise_labels(self, labels):
+
+        labels = OneHotEncoder
+
+

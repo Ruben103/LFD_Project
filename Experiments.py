@@ -12,3 +12,7 @@ class Experiments:
 
         data = Data().read_data(self.data_directory)
         bodies = Data().read_bodies(data)
+        bodies2 = Data().read_saved_bodies()
+
+        if bodies == bodies2:
+            print("Great success")
