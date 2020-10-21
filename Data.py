@@ -70,6 +70,7 @@ class Data:
 
     def read_saved_bodies(self):
         bodies = read_csv('bodies.csv')
+        bodies = bodies.drop(columns=bodies.columns[0])
         return bodies
 
     def vectorise_input(self):
