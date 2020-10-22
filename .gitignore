@@ -2,5 +2,7 @@ COP.filt3.sub.zip
 COP_filt3_sub/
 .idea
 __pycache__
+venv/
 bodies.csv
 BigAss.txt
+wordEmb_project.bin

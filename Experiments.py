@@ -12,7 +12,8 @@ class Experiments:
         Data().read_bodies(data)
 
     def experimentOne(self):
-        bodies = Data().read_saved_bodies()
+        data = Data().read_data(self.data_directory)
+        bodies = Data().read_bodies(data)
         labels = Data().vectorise_labels(bodies['year'])
 
 
