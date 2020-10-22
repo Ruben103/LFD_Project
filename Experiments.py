@@ -13,6 +13,7 @@ class Experiments:
 
     def experimentOne(self):
         bodies = Data().read_saved_bodies()
+        Data().vectorise_input()
 
 
     def expCreateWordEmbeddingsInput(self):

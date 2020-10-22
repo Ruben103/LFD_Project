@@ -72,6 +72,8 @@ class Data:
         try:
             bodies = read_csv('bodies.csv')
             bodies = bodies.drop(columns=bodies.columns[0])
+            bodies['year'] = bodies['year'].astype(int)
+            bodies['date'] = to_datetime(bodies['date'])
             return bodies
         except FileNotFoundError:
             print(
