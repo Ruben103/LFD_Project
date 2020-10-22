@@ -13,7 +13,7 @@ class Experiments:
 
     def experimentOne(self):
         bodies = Data().read_saved_bodies()
-        Data().vectorise_input()
+        labels = Data().vectorise_labels(bodies['year'])
 
 
     def expCreateWordEmbeddingsInput(self):

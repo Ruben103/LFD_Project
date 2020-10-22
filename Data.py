@@ -1,7 +1,7 @@
 import os
 import zipfile
 from pandas import read_json, read_csv, DataFrame, concat, to_datetime, Series
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import label_binarize
 from datetime import datetime
 from numpy import datetime64
 
@@ -91,9 +91,6 @@ class Data:
                 handle.write(bodies.iloc[id]['body'])
         handle.close()
 
-    def vectorise_input(self):
-        pass
-
-    def vectorise_labels(self, labels):
-
-        labels = OneHotEncoder
+    @staticmethod
+    def one_hot_encode(labels):
+        return label_binarize(labels, classes=list(set(labels)))
