@@ -14,7 +14,7 @@ class Experiments:
     def experimentOne(self):
         data = Data().read_data(self.data_directory)
         bodies = Data().read_bodies(data)
-        labels = Data().vectorise_labels(bodies['year'])
+        labels = Data().one_hot_encode(bodies['year'])
 
 
     def expCreateWordEmbeddingsInput(self):

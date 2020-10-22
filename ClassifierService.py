@@ -4,10 +4,10 @@ from keras.optimizers import sgd, adam
 
 class Classifier:
 
-    def __init__(self, type, INPUT_DIM, data):
-        self.type = type
-        self.INPUT_DIM = INPUT_DIM
+    def __init__(self, type, data):
         self.data = data
+        self.type = type
+        self.INPUT_DIM = self.get_INPUT_DIM(self.data)
         self.number_of_labels = self.get_number_of_labels(self.data)
 
         if self.type == 'MLP':
@@ -27,6 +27,9 @@ class Classifier:
     def fit_input(self, X, Y):
 
         self.model.fit(X, Y)
+
+    def get_INPUT_DIM(self, data):
+        pass
 
     def get_number_of_labels(self, data):
         return 25
