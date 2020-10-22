@@ -31,4 +31,6 @@ class Experiments:
         print(wordsInVocab)
         print(model.similarity('this', 'is'))
         print(model.similarity('post', 'book'))
+        x = model.get_vector('the')
+        print("x")
         print("bug stop")
