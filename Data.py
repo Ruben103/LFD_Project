@@ -52,7 +52,7 @@ class Data:
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         return data
 
-    def read_bodies(self, data, save_bodies=False):
+    def read_bodies(self, data, newspaper,save_bodies=True):
         # takes around 2 minutes 20 seconds on my Macbook Pro
         print("\nReading bodies...")
         start_time = datetime.utcnow()
@@ -60,13 +60,15 @@ class Data:
 
         for id in range(data.shape[0]):
             article = data.iloc[id]['articles']
-            dtime = to_datetime(article['date'])
-            body = article['body']
-            bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']))
+            if article['newspaper'] == newspaper:
+                dtime = to_datetime(article['date'])
+                body = article['body']
+                bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']))
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         if save_bodies:
             print("Saving bodies to csv")
-            bodies.to_csv('bodies.csv')
+            filename = 'bodies' + newspaper.replace(" ", '') + '.csv'
+            bodies.to_csv(filename)
         return bodies
 
     def read_saved_bodies(self):

@@ -13,16 +13,14 @@ class Experiments:
         Data().read_bodies(data)
 
     def experimentOne(self):
-        Data().read_embedding_model()
-
         data = Data().read_data(self.data_directory)
-        bodies = Data().read_bodies(data)
-        labels = Data().one_hot_encode(bodies['year'])
+        bodies = Data().read_bodies(data=data, newspaper='The Australian')
+
 
     def expCreateWordEmbeddingsInput(self):
         Data().create_word_embeddings_input()
 
-    def expUseBinFile(self):
+    def experimentCreateInput(self):
         input_data = Data().create_input_data()
 
 
