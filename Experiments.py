@@ -16,12 +16,11 @@ class Experiments:
         data = Data().read_data(self.data_directory)
         bodies = Data().read_bodies(data=data, newspaper='The Australian')
 
-
     def expCreateWordEmbeddingsInput(self):
         Data().create_word_embeddings_input()
 
     def experimentCreateInput(self):
-        input_data = Data().create_input_data()
+        input_data = Data().create_input_data(newspaper='The Australian')
 
 
         # train_x = Data().r

@@ -3,6 +3,8 @@ import zipfile
 from pandas import read_json, read_csv, DataFrame, concat, to_datetime, concat
 from sklearn.preprocessing import label_binarize
 from datetime import datetime
+from numpy.random import rand
+import random
 import numpy as np
 import gensim
 
@@ -71,16 +73,21 @@ class Data:
             bodies.to_csv(filename)
         return bodies
 
-    def read_saved_bodies(self):
-        try:
+    def read_saved_bodies(self, newspaper='all'):
+        bodies=None
+        newspaper = newspaper.replace(" ", "")
+        if newspaper == 'all':
             bodies = read_csv('bodies.csv')
+        elif newspaper == 'TheAustralian':
+            bodies = read_csv('bodiesTheAustralian.csv')
+        try:
             bodies = bodies.drop(columns=bodies.columns[0])
             bodies['year'] = bodies['year'].astype(int)
             bodies['date'] = to_datetime(bodies['date'])
             return bodies
         except FileNotFoundError:
             print(
-                "File bodies.csv was not found..\nCheck if you are in the correct directory or construct them using the method read_bodies in the Data class")
+                "Specified bodies .csv-file was not found..\nCheck if you are in the correct directory or construct them using the method read_bodies in the Data class")
             quit()
 
     def create_word_embeddings_input(self):
@@ -120,35 +127,37 @@ class Data:
             try:
                 embedding_struct[count] = np.append(embeddings_model.get_vector(word), label)
             except KeyError:
-                # print(word, "not in EmbeddingsModel-vectors")
+                # print(word, "\nnot in EmbeddingsModel-vectors")
                 try:
                     # print("But", word, "is in GoogleNews-vectors")
                     embedding_struct[count] = np.append(google_model.get_vector(word), label)
                 except KeyError:
                     # print(word, 'also not in GoogleNews-vectors')
-                    True==True
+                    embedding_struct[count] = np.append(rand(1, 300), label)
             count += 1
         return embedding_struct
 
-    def create_input_data(self):
+    def create_input_data(self, newspaper, save_data=True):
+        #read data and create data structure
+        data = self.read_saved_bodies(newspaper='The Australian')
+        input_data = DataFrame()
+
         # read in embeddings
         embeddings_model = self.read_embedding_model()
         google_model = self.read_google_embeddings()
 
-        #read data and create data structure
-        data = self.read_saved_bodies()
-        input_data = DataFrame()
-
-        for id in range(50):
+        for id in range(data.shape[0]):
             print("row", str(id) + '/' + str(data.shape[0]))
             body = data.iloc[id]['body']
             year = data.iloc[id]['year']
             pattern = Data().create_pattern(google_model=google_model, embeddings_model=embeddings_model, body=body,
                                             label=year)
-
             if input_data.empty:
                 input_data = pattern.transpose()
             else:
                 input_data = concat([input_data, pattern.transpose()], ignore_index=True)
-        input_data.to_csv("input_data_all.csv")
+        if save_data:
+            print("Saving input data for", newspaper)
+            filename = 'input_data' + newspaper.replace(" ", '') + '.csv'
+            input_data.to_csv(filename)
         return input_data
