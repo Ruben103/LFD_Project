@@ -16,6 +16,8 @@ class Classifier:
 
         if self.type == 'MLP':
             self.MLP()
+        elif self.type == 'DropoutAdam':
+            self.DropoutAdam()
 
     def MLP(self):
 
@@ -30,6 +32,7 @@ class Classifier:
 
     def DropoutAdam(self, rate):
         # Build the model
+        rate = 0.4
         print("Building model...")
         model = Sequential()
         # Single 500-neuron hidden layer with sigmoid activation

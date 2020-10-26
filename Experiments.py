@@ -25,7 +25,7 @@ class Experiments:
         Data().create_word_embeddings_input()
 
     def experimentCreateInput(self):
-        input_data = Data().create_input_data(newspaper='The Australian')
+        input_data = Data().create_input_data(newspaper='The Age')
 
 
     def experimentClassifier(self, args):
