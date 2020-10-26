@@ -1,5 +1,4 @@
 from Data import Data
-import gensim
 import os
 
 class Experiments:
@@ -14,23 +13,19 @@ class Experiments:
         Data().read_bodies(data)
 
     def experimentOne(self):
+        Data().read_embedding_model()
+
         data = Data().read_data(self.data_directory)
         bodies = Data().read_bodies(data)
         labels = Data().one_hot_encode(bodies['year'])
 
-
     def expCreateWordEmbeddingsInput(self):
-
         Data().create_word_embeddings_input()
 
     def expUseBinFile(self):
-        path = os.path.join(os.getcwd(), 'wordEmb_project.bin')
-        model = gensim.models.KeyedVectors.load_word2vec_format(path, binary=True)
-        vocab = model.vocab.keys()
-        wordsInVocab = len(vocab)
-        print(wordsInVocab)
-        print(model.similarity('this', 'is'))
-        print(model.similarity('post', 'book'))
-        x = model.get_vector('the')
-        print("x")
-        print("bug stop")
+        input_data = Data().create_input_data()
+
+
+        # train_x = Data().r
+
+        print("")

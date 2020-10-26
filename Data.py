@@ -1,9 +1,10 @@
 import os
 import zipfile
-from pandas import read_json, read_csv, DataFrame, concat, to_datetime, Series
+from pandas import read_json, read_csv, DataFrame, concat, to_datetime, concat
 from sklearn.preprocessing import label_binarize
 from datetime import datetime
-from numpy import datetime64
+import numpy as np
+import gensim
 
 
 class Data:
@@ -80,7 +81,6 @@ class Data:
                 "File bodies.csv was not found..\nCheck if you are in the correct directory or construct them using the method read_bodies in the Data class")
             quit()
 
-
     def create_word_embeddings_input(self):
         print("\ncreating input for word embeddings. Writing to BigAss.txt")
         bodies = self.read_saved_bodies()
@@ -91,6 +91,62 @@ class Data:
                 handle.write(bodies.iloc[id]['body'])
         handle.close()
 
+    def read_embedding_model(self):
+        print("Reading Our Embeddings...")
+        path = os.path.join(os.getcwd(), 'wordEmb_project.bin')
+        model = gensim.models.KeyedVectors.load_word2vec_format(path, binary=True)
+        print("Done")
+        return model
+
+    def read_google_embeddings(self):
+        print("Reading Google Embeddings...")
+        path = os.path.join(os.getcwd(), 'GoogleNews-vectors-negative300.bin')
+        model = gensim.models.KeyedVectors.load_word2vec_format(path, binary=True)
+        print("Done")
+        return model
+
     @staticmethod
     def one_hot_encode(labels):
         return label_binarize(labels, classes=list(set(labels)))
+
+    def create_pattern(self, google_model, embeddings_model, body, label):
+
+        embedding_struct = DataFrame()
+        words = body.split()
+        count = 0
+        for word in set(words):
+            try:
+                embedding_struct[count] = np.append(embeddings_model.get_vector(word), label)
+            except KeyError:
+                # print(word, "not in EmbeddingsModel-vectors")
+                try:
+                    # print("But", word, "is in GoogleNews-vectors")
+                    embedding_struct[count] = np.append(google_model.get_vector(word), label)
+                except KeyError:
+                    # print(word, 'also not in GoogleNews-vectors')
+                    True==True
+            count += 1
+        return embedding_struct
+
+    def create_input_data(self):
+        # read in embeddings
+        embeddings_model = self.read_embedding_model()
+        google_model = self.read_google_embeddings()
+
+        #read data and create data structure
+        data = self.read_saved_bodies()
+        input_data = DataFrame()
+
+        for id in range(50):
+            print("row", str(id) + '/' + str(data.shape[0]))
+            body = data.iloc[id]['body']
+            year = data.iloc[id]['year']
+            pattern = Data().create_pattern(google_model=google_model, embeddings_model=embeddings_model, body=body,
+                                            label=year)
+
+            if input_data.empty:
+                input_data = pattern.transpose()
+            else:
+                input_data = concat([input_data, pattern.transpose()], ignore_index=True)
+        input_data.to_csv("input_data_all.csv")
+        return input_data
