@@ -142,22 +142,33 @@ class Data:
         data = self.read_saved_bodies(newspaper='The Australian')
         input_data = DataFrame()
 
+        # determining cut-off saving point
+        x = 0
+        for i in range(500, data.shape[0], 1):
+            if data.shape[0] % i == 0:
+               x = i; break
+
         # read in embeddings
         embeddings_model = self.read_embedding_model()
         google_model = self.read_google_embeddings()
 
-        for id in range(data.shape[0]):
-            print("row", str(id) + '/' + str(data.shape[0]))
-            body = data.iloc[id]['body']
-            year = data.iloc[id]['year']
-            pattern = Data().create_pattern(google_model=google_model, embeddings_model=embeddings_model, body=body,
-                                            label=year)
-            if input_data.empty:
-                input_data = pattern.transpose()
-            else:
-                input_data = concat([input_data, pattern.transpose()], ignore_index=True)
-        if save_data:
-            print("Saving input data for", newspaper)
-            filename = 'input_data' + newspaper.replace(" ", '') + '.csv'
-            input_data.to_csv(filename)
+        count = 0
+        for i in range(int(data.shape[0] / x)):
+            for id in range(0+count, x+count, 1):
+                if x+count >= data.shape[0]:
+                    break
+                print("row", str(id) + '/' + str(data.shape[0]))
+                body = data.iloc[id]['body']
+                year = data.iloc[id]['year']
+                pattern = Data().create_pattern(google_model=google_model, embeddings_model=embeddings_model, body=body,
+                                                label=year)
+                if input_data.empty:
+                    input_data = pattern.transpose()
+                else:
+                    input_data = concat([input_data, pattern.transpose()], ignore_index=True)
+            count += x
+            if save_data:
+                print("Saving input data for", newspaper)
+                filename = 'input_data' + newspaper.replace(" ", '') + '.csv'
+                input_data.to_csv(filename, mode='a', header=False)
         return input_data
