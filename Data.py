@@ -93,7 +93,7 @@ class Data:
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         if save_bodies:
             print("Saving bodies to csv")
-            filename = 'bodies' + newspaper.replace(" ", '') + '.csv'
+            filename = 'bodies/bodies' + newspaper.replace(" ", '') + '.csv'
             bodies.to_csv(filename)
 
     def read_saved_bodies(self, newspaper='all'):
@@ -261,6 +261,6 @@ class Data:
             count += x
             if save_data:
                 print("Saving input data for", newspaper)
-                filename = 'input_data' + newspaper.replace(" ", '') + '.csv'
+                filename = 'input_data/input_data' + newspaper.replace(" ", '') + '.csv'
                 input_data.to_csv(filename, mode='a', header='false')
         return input_data
