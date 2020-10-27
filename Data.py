@@ -100,7 +100,7 @@ class Data:
         bodies = None
         newspaper = newspaper.replace(" ", "")
         if newspaper == 'all':
-            bodies = read_csv('bodies.csv')
+            bodies = read_csv('bodies/bodies.csv')
         elif newspaper == 'TheAustralian':
             bodies = read_csv('bodies/bodiesTheAustralian.csv')
 
