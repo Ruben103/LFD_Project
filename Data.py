@@ -54,32 +54,79 @@ class Data:
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         return data
 
-    def read_bodies(self, data, newspaper,save_bodies=True):
-        # takes around 2 minutes 20 seconds on my Macbook Pro
-        print("\nReading bodies...")
+    def read_bodies(self, data, save_bodies=True):
         start_time = datetime.utcnow()
-        bodies = DataFrame(columns=['date', 'body', 'year'])
+        bodies = DataFrame(columns=['date', 'body', 'year', 'newspaper'])
 
         for id in range(data.shape[0]):
             article = data.iloc[id]['articles']
-            if article['newspaper'] == newspaper:
-                dtime = to_datetime(article['date'])
+            dtime = to_datetime(article['date'])
+            body = article['body']
+            newspaper = article['newspaper']
+            bodies = bodies.append(
+                DataFrame(data=[[dtime, body, dtime.year, newspaper]], columns=['date', 'body', 'year', 'newspaper']))
+
+        print("Done.", 'Time:', datetime.utcnow() - start_time)
+        if save_bodies:
+            print("Saving bodies to csv")
+            filename = 'bodies.csv'
+            bodies.to_csv(filename)
+
+    def scrape_bodies(self, data, newspaper, save_bodies=True):
+        # takes around 2 minutes 20 seconds on my Macbook Pro
+        print("\nProcesssing Bodies from", newspaper)
+        start_time = datetime.utcnow()
+        bodies = DataFrame(columns=['date', 'body', 'year'])
+        years = [x for x in range(1994, 2019, 1)]
+        date_years = dict.fromkeys(years, 0)
+        all_newspapers = []
+
+        for id in range(data.shape[0]):
+            article = data.iloc[id]['articles']
+            dtime = to_datetime(article['date'])
+            if article['newspaper'] == newspaper and date_years[dtime.year] < 30:
                 body = article['body']
                 bodies = bodies.append(DataFrame(data=[[dtime, body, dtime.year]], columns=['date', 'body', 'year']))
+                date_years[dtime.year] += 1
+                if date_years[dtime.year] == 30:
+                    print("Finished processing year", dtime, 'Count:', str(date_years[dtime.year]))
         print("Done.", 'Time:', datetime.utcnow() - start_time)
         if save_bodies:
             print("Saving bodies to csv")
             filename = 'bodies' + newspaper.replace(" ", '') + '.csv'
             bodies.to_csv(filename)
-        return bodies
 
     def read_saved_bodies(self, newspaper='all'):
-        bodies=None
+        bodies = None
         newspaper = newspaper.replace(" ", "")
         if newspaper == 'all':
             bodies = read_csv('bodies.csv')
         elif newspaper == 'TheAustralian':
-            bodies = read_csv('bodiesTheAustralian.csv')
+            bodies = read_csv('bodies/bodiesTheAustralian.csv')
+
+        elif newspaper == 'Mail&Guardian':
+            bodies = read_csv('bodies/bodiesMail&Guardian.csv')
+
+        elif newspaper == 'TheAge(Melbourne,Australia)':
+            bodies = read_csv('bodies/bodiesTheAge(Melbourne,Australia).csv')
+
+        elif newspaper == 'TheTimes(SouthAfrica)':
+            bodies = read_csv('bodies/bodiesSydneyMorningHerald(Australia).csv')
+
+        elif newspaper == 'TheHindu':
+            bodies = read_csv('bodies/bodiesTheHindu.csv')
+
+        elif newspaper == 'TheWashingtonPost':
+            bodies = read_csv('bodies/bodiesTheWashingtonPost.csv')
+
+        elif newspaper == 'TheTimesofIndia(TOI)':
+            bodies = read_csv('bodies/bodiesTheTimesofIndia(TOI).csv')
+
+        elif newspaper == 'SydneyMorningHerald(Australia)':
+            bodies = read_csv('bodies/bodiesSydneyMorningHerald(Australia).csv')
+
+        elif newspaper == 'TheNewYorkTimes':
+            bodies = read_csv('bodies/bodiesTheNewYorkTimes.csv')
         try:
             bodies = bodies.drop(columns=bodies.columns[0])
             bodies['year'] = bodies['year'].astype(int)
@@ -88,6 +135,51 @@ class Data:
         except FileNotFoundError:
             print(
                 "Specified bodies .csv-file was not found..\nCheck if you are in the correct directory or construct them using the method read_bodies in the Data class")
+            quit()
+
+    def read_input_data(self, newspaper='all'):
+
+        data = None
+        newspaper = newspaper.replace(" ", "")
+
+        if newspaper == 'all':
+            print("No newspaper was provided.\nCheck spelling or parameter input")
+            quit()
+        elif newspaper == 'TheAustralian':
+            data = read_csv('input_data/input_dataTheAustralian.csv')
+
+        elif newspaper == 'Mail&Guardian':
+            data = read_csv('input_data/input_dataMail&Guardian.csv')
+
+        elif newspaper == 'TheAge(Melbourne,Australia)':
+            data = read_csv('input_data/input_dataTheAge(Melbourne,Australia).csv')
+
+        elif newspaper == 'TheTimes(SouthAfrica)':
+            data = read_csv('input_data/input_dataSydneyMorningHerald(Australia).csv')
+
+        elif newspaper == 'TheHindu':
+            data = read_csv('input_data/input_dataTheHindu.csv')
+
+        elif newspaper == 'TheWashingtonPost':
+            data = read_csv('input_data/input_dataTheWashingtonPost.csv')
+
+        elif newspaper == 'TheTimesofIndia(TOI)':
+            data = read_csv('input_data/input_dataTheTimesofIndia(TOI).csv')
+
+        elif newspaper == 'SydneyMorningHerald(Australia)':
+            data = read_csv('input_data/input_dataSydneyMorningHerald(Australia).csv')
+
+        elif newspaper == 'TheNewYorkTimes':
+            data = read_csv('input_data/input_dataTheNewYorkTimes.csv')
+
+        try:
+            data = data.drop(columns=data.columns[0])
+            data = data.dropna()
+            data[data.columns[len(data.columns)-1]] = data[data.columns[len(data.columns)-1]].astype(np.int64)
+            return data
+        except KeyError:
+            print(
+                "You provided the wrong key to cast.")
             quit()
 
     def create_word_embeddings_input(self):
@@ -137,25 +229,25 @@ class Data:
             count += 1
         return embedding_struct
 
-    def create_input_data(self, newspaper, save_data=True):
-        #read data and create data structure
-        data = self.read_saved_bodies(newspaper='The Australian')
-        input_data = DataFrame()
+    def create_input_data(self, newspaper, embeddings_model, google_model, save_data=True):
+        # read data and create data structure
+        data = Data().read_saved_bodies(newspaper=newspaper)
+        print("\nProcessing newspaper", newspaper)
 
         # determining cut-off saving point
         x = 0
-        for i in range(500, data.shape[0], 1):
+        for i in range(50, data.shape[0] + 1, 1):
             if data.shape[0] % i == 0:
-               x = i; break
-
-        # read in embeddings
-        embeddings_model = self.read_embedding_model()
-        google_model = self.read_google_embeddings()
+                x = i;
+                break
+        if x == 0:
+            x = data.shape[0]
 
         count = 0
         for i in range(int(data.shape[0] / x)):
-            for id in range(0+count, x+count, 1):
-                if x+count >= data.shape[0]:
+            input_data = DataFrame()
+            for id in range(0 + count, x + count, 1):
+                if x + count >= data.shape[0]:
                     break
                 print("row", str(id) + '/' + str(data.shape[0]))
                 body = data.iloc[id]['body']
@@ -170,5 +262,5 @@ class Data:
             if save_data:
                 print("Saving input data for", newspaper)
                 filename = 'input_data' + newspaper.replace(" ", '') + '.csv'
-                input_data.to_csv(filename, mode='a', header=False)
+                input_data.to_csv(filename, mode='a', header='false')
         return input_data

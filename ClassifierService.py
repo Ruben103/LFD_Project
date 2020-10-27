@@ -48,7 +48,6 @@ class Classifier:
         model.summary()
 
     def fit_input(self, X, Y):
-
         self.model.fit(X, Y)
 
     def get_INPUT_DIM(self, data):
